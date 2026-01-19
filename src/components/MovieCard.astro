@@ -13,29 +13,6 @@ interface Props {
 const { title, posterPath, releaseDate, notes, rating } = Astro.props;
 const posterUrl = getPosterUrl(posterPath);
 const year = getYear(releaseDate);
-
-// Thumbs icon components
-const thumbsIcons = {
-	up: (
-		<svg class="h-5 w-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
-			<path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-		</svg>
-	),
-	down: (
-		<svg class="h-5 w-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-			<path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
-		</svg>
-	),
-	meh: (
-		<svg
-			class="h-5 w-5 text-yellow-600 dark:text-yellow-400"
-			fill="currentColor"
-			viewBox="0 0 20 20"
-		>
-			<path d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" />
-		</svg>
-	),
-};
 ---
 
 <div
@@ -58,7 +35,7 @@ const thumbsIcons = {
 							stroke-linejoin="round"
 							stroke-width="2"
 							d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"
-						/>
+						></path>
 					</svg>
 				</div>
 			)
@@ -70,17 +47,51 @@ const thumbsIcons = {
 			<h3 class="line-clamp-2 font-semibold text-gray-900 dark:text-gray-100">
 				{title}
 			</h3>
-			{rating && <div class="flex-shrink-0">{thumbsIcons[rating]}</div>}
+			{
+				rating && (
+					<div class="flex-shrink-0">
+						{rating === "up" && (
+							<svg
+								class="h-5 w-5 text-green-600 dark:text-green-400"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+							</svg>
+						)}
+						{rating === "down" && (
+							<svg
+								class="h-5 w-5 text-red-600 dark:text-red-400"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+							</svg>
+						)}
+						{rating === "meh" && (
+							<svg
+								class="h-5 w-5 text-yellow-600 dark:text-yellow-400"
+								fill="currentColor"
+								viewBox="0 0 20 20"
+							>
+								<path d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" />
+							</svg>
+						)}
+					</div>
+				)
+			}
 		</div>
 
 		<div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
 			<span>{year}</span>
-			{notes && (
-				<>
-					<span>•</span>
-					<span class="italic">{notes}</span>
-				</>
-			)}
+			{
+				notes && (
+					<>
+						<span>•</span>
+						<span class="italic">{notes}</span>
+					</>
+				)
+			}
 		</div>
 	</div>
 </div>
