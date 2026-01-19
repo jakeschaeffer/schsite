@@ -1,0 +1,62 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import MovieCard from "@/components/MovieCard.astro";
+import { getMovies } from "@/lib/tmdb";
+
+const meta = {
+	description: "Movies I've watched and enjoyed",
+	title: "Movies",
+};
+
+// List of movie IDs to fetch from TMDB
+// You can update this list with your own movie IDs
+const movieIds = [
+	278, // The Shawshank Redemption
+	155, // The Dark Knight
+	27205, // Inception
+];
+
+// Fetch movies at build time
+const movies = await getMovies(movieIds);
+---
+
+<PageLayout meta={meta}>
+	<div class="w-full">
+		<div class="mb-8">
+			<h1 class="title mb-4">Movies</h1>
+			<p class="text-gray-600 dark:text-gray-400">
+				A curated collection of movies I've watched. Data from{" "}
+				<a
+					href="https://www.themoviedb.org"
+					class="cactus-link"
+					target="_blank"
+					rel="noopener noreferrer">The Movie Database</a
+				>.
+			</p>
+		</div>
+
+		{
+			movies.length > 0 ? (
+				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					{movies.map((movie) => (
+						<MovieCard
+							title={movie.title}
+							posterPath={movie.poster_path}
+							releaseDate={movie.release_date}
+							rating={movie.vote_average}
+							overview={movie.overview}
+						/>
+					))}
+				</div>
+			) : (
+				<div class="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+					<p class="text-gray-600 dark:text-gray-400">
+						{import.meta.env.TMDB_API_KEY
+							? "No movies found. Check the console for errors."
+							: "TMDB API key is not configured. Please add TMDB_API_KEY to your .env file."}
+					</p>
+				</div>
+			)
+		}
+	</div>
+</PageLayout>
