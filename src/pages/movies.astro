@@ -2,21 +2,36 @@
 import PageLayout from "@/layouts/Base.astro";
 import MovieCard from "@/components/MovieCard.astro";
 import { getMovies } from "@/lib/tmdb";
-import { watchHistory, getMovieIdsByYear } from "@/data/watch-history";
+import { watchHistory, getMovieEntriesWithNotes, getMovieIdsByYear } from "@/data/watch-history";
 
 const meta = {
 	description: "Movies I've watched and enjoyed",
 	title: "Movies",
 };
 
-// Fetch movies for each year
+// Fetch movies for each year with their watch entry metadata
 const moviesByYear = await Promise.all(
 	watchHistory.map(async (yearGroup) => {
+		const movieEntries = getMovieEntriesWithNotes(yearGroup.year);
 		const movieIds = getMovieIdsByYear(yearGroup.year);
 		const movies = await getMovies(movieIds);
+
+		// Create a map of TMDB ID to entry for quick lookup
+		const entryMap = new Map(movieEntries.map((entry) => [entry.tmdbId, entry]));
+
+		// Combine TMDB data with watch entry metadata
+		const moviesWithMetadata = movies.map((movie) => {
+			const entry = entryMap.get(movie.id);
+			return {
+				...movie,
+				notes: entry?.notes || "",
+				rating: entry?.rating,
+			};
+		});
+
 		return {
 			year: yearGroup.year,
-			movies,
+			movies: moviesWithMetadata,
 		};
 	}),
 );
@@ -46,14 +61,14 @@ const yearsWithMovies = moviesByYear.filter((group) => group.movies.length > 0);
 					{yearsWithMovies.map(({ year, movies }) => (
 						<section>
 							<h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">{year}</h2>
-							<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+							<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 								{movies.map((movie) => (
 									<MovieCard
 										title={movie.title}
 										posterPath={movie.poster_path}
 										releaseDate={movie.release_date}
-										rating={movie.vote_average}
-										overview={movie.overview}
+										notes={movie.notes}
+										rating={movie.rating}
 									/>
 								))}
 							</div>

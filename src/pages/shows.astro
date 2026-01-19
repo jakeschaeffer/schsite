@@ -2,21 +2,40 @@
 import PageLayout from "@/layouts/Base.astro";
 import ShowCard from "@/components/ShowCard.astro";
 import { getTVShows } from "@/lib/tmdb";
-import { watchHistory, getTVShowIdsByYear } from "@/data/watch-history";
+import {
+	watchHistory,
+	getTVShowEntriesWithNotes,
+	getTVShowIdsByYear,
+} from "@/data/watch-history";
 
 const meta = {
 	description: "TV shows I've watched and enjoyed",
 	title: "TV Shows",
 };
 
-// Fetch TV shows for each year
+// Fetch TV shows for each year with their watch entry metadata
 const showsByYear = await Promise.all(
 	watchHistory.map(async (yearGroup) => {
+		const showEntries = getTVShowEntriesWithNotes(yearGroup.year);
 		const showIds = getTVShowIdsByYear(yearGroup.year);
 		const shows = await getTVShows(showIds);
+
+		// Create a map of TMDB ID to entry for quick lookup
+		const entryMap = new Map(showEntries.map((entry) => [entry.tmdbId, entry]));
+
+		// Combine TMDB data with watch entry metadata
+		const showsWithMetadata = shows.map((show) => {
+			const entry = entryMap.get(show.id);
+			return {
+				...show,
+				notes: entry?.notes || "",
+				rating: entry?.rating,
+			};
+		});
+
 		return {
 			year: yearGroup.year,
-			shows,
+			shows: showsWithMetadata,
 		};
 	}),
 );
@@ -46,16 +65,14 @@ const yearsWithShows = showsByYear.filter((group) => group.shows.length > 0);
 					{yearsWithShows.map(({ year, shows }) => (
 						<section>
 							<h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">{year}</h2>
-							<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+							<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 								{shows.map((show) => (
 									<ShowCard
 										name={show.name}
 										posterPath={show.poster_path}
 										firstAirDate={show.first_air_date}
-										rating={show.vote_average}
-										overview={show.overview}
-										numberOfSeasons={show.number_of_seasons}
-										numberOfEpisodes={show.number_of_episodes}
+										notes={show.notes}
+										rating={show.rating}
 									/>
 								))}
 							</div>

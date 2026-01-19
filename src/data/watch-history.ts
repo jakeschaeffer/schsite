@@ -4,11 +4,13 @@
  */
 
 export type WatchType = "movie" | "tv";
+export type Rating = "up" | "down" | "meh";
 
 export interface WatchEntry {
 	tmdbId: number;
 	type: WatchType;
-	notes?: string; // For tracking episodes, seasons, or other details
+	notes?: string; // What you watched (e.g., "S1E1-3", "All of Season 1", etc.)
+	rating?: Rating; // Optional thumbs up/down/meh rating
 }
 
 export interface YearGroup {
@@ -103,21 +105,39 @@ export function getEntriesByYear(year: number): WatchEntry[] {
 }
 
 /**
- * Get all unique movie IDs for a specific year
+ * Get movie entries with notes for a specific year
+ * Only returns entries that have notes (to display what was watched)
+ */
+export function getMovieEntriesWithNotes(year: number): WatchEntry[] {
+	const entries = getEntriesByYear(year);
+	return entries.filter((entry) => entry.type === "movie" && entry.notes);
+}
+
+/**
+ * Get TV show entries with notes for a specific year
+ * Only returns entries that have notes (to display what was watched)
+ */
+export function getTVShowEntriesWithNotes(year: number): WatchEntry[] {
+	const entries = getEntriesByYear(year);
+	return entries.filter((entry) => entry.type === "tv" && entry.notes);
+}
+
+/**
+ * Get all unique movie IDs for a specific year (with notes only)
  */
 export function getMovieIdsByYear(year: number): number[] {
-	const entries = getEntriesByYear(year);
-	const movieIds = entries.filter((entry) => entry.type === "movie").map((entry) => entry.tmdbId);
+	const entries = getMovieEntriesWithNotes(year);
+	const movieIds = entries.map((entry) => entry.tmdbId);
 	// Remove duplicates
 	return [...new Set(movieIds)];
 }
 
 /**
- * Get all unique TV show IDs for a specific year
+ * Get all unique TV show IDs for a specific year (with notes only)
  */
 export function getTVShowIdsByYear(year: number): number[] {
-	const entries = getEntriesByYear(year);
-	const tvIds = entries.filter((entry) => entry.type === "tv").map((entry) => entry.tmdbId);
+	const entries = getTVShowEntriesWithNotes(year);
+	const tvIds = entries.map((entry) => entry.tmdbId);
 	// Remove duplicates
 	return [...new Set(tvIds)];
 }
