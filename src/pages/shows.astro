@@ -1,0 +1,64 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import ShowCard from "@/components/ShowCard.astro";
+import { getTVShows } from "@/lib/tmdb";
+
+const meta = {
+	description: "TV shows I've watched and enjoyed",
+	title: "TV Shows",
+};
+
+// List of TV show IDs to fetch from TMDB
+// You can update this list with your own show IDs
+const showIds = [
+	1396, // Breaking Bad
+	1399, // Game of Thrones
+	100088, // The Last of Us
+];
+
+// Fetch TV shows at build time
+const shows = await getTVShows(showIds);
+---
+
+<PageLayout meta={meta}>
+	<div class="w-full">
+		<div class="mb-8">
+			<h1 class="title mb-4">TV Shows</h1>
+			<p class="text-gray-600 dark:text-gray-400">
+				A curated collection of TV shows I've watched. Data from{" "}
+				<a
+					href="https://www.themoviedb.org"
+					class="cactus-link"
+					target="_blank"
+					rel="noopener noreferrer">The Movie Database</a
+				>.
+			</p>
+		</div>
+
+		{
+			shows.length > 0 ? (
+				<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					{shows.map((show) => (
+						<ShowCard
+							name={show.name}
+							posterPath={show.poster_path}
+							firstAirDate={show.first_air_date}
+							rating={show.vote_average}
+							overview={show.overview}
+							numberOfSeasons={show.number_of_seasons}
+							numberOfEpisodes={show.number_of_episodes}
+						/>
+					))}
+				</div>
+			) : (
+				<div class="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+					<p class="text-gray-600 dark:text-gray-400">
+						{import.meta.env.TMDB_API_KEY
+							? "No TV shows found. Check the console for errors."
+							: "TMDB API key is not configured. Please add TMDB_API_KEY to your .env file."}
+					</p>
+				</div>
+			)
+		}
+	</div>
+</PageLayout>
