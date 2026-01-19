@@ -119,3 +119,63 @@ export function getYear(dateString: string): string {
 export function formatRating(rating: number): string {
 	return rating.toFixed(1);
 }
+
+/**
+ * Search for movies by title
+ */
+export async function searchMovie(title: string): Promise<Movie[]> {
+	const apiKey = import.meta.env.TMDB_API_KEY;
+
+	if (!apiKey) {
+		console.error("TMDB_API_KEY is not set in environment variables");
+		return [];
+	}
+
+	try {
+		const encodedTitle = encodeURIComponent(title);
+		const response = await fetch(
+			`${TMDB_BASE_URL}/search/movie?api_key=${apiKey}&query=${encodedTitle}`,
+		);
+
+		if (!response.ok) {
+			console.error(`Failed to search for movie "${title}": ${response.status} ${response.statusText}`);
+			return [];
+		}
+
+		const data = await response.json();
+		return (data.results as Movie[]) || [];
+	} catch (error) {
+		console.error(`Error searching for movie "${title}":`, error);
+		return [];
+	}
+}
+
+/**
+ * Search for TV shows by title
+ */
+export async function searchTVShow(title: string): Promise<TVShow[]> {
+	const apiKey = import.meta.env.TMDB_API_KEY;
+
+	if (!apiKey) {
+		console.error("TMDB_API_KEY is not set in environment variables");
+		return [];
+	}
+
+	try {
+		const encodedTitle = encodeURIComponent(title);
+		const response = await fetch(
+			`${TMDB_BASE_URL}/search/tv?api_key=${apiKey}&query=${encodedTitle}`,
+		);
+
+		if (!response.ok) {
+			console.error(`Failed to search for TV show "${title}": ${response.status} ${response.statusText}`);
+			return [];
+		}
+
+		const data = await response.json();
+		return (data.results as TVShow[]) || [];
+	} catch (error) {
+		console.error(`Error searching for TV show "${title}":`, error);
+		return [];
+	}
+}
