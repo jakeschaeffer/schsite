@@ -1,0 +1,35 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import { watchHistory } from "@/data/simple-watch-history";
+
+const meta = {
+	description: "What I've watched over the years",
+	title: "What I Watched",
+};
+---
+
+<PageLayout meta={meta}>
+	<div class="w-full">
+		<div class="mb-8">
+			<h1 class="title mb-4">What I Watched</h1>
+			<p class="text-gray-600 dark:text-gray-400">
+				A running list of movies, shows, and other media I've watched, organized by year.
+			</p>
+		</div>
+
+		<div class="space-y-12">
+			{
+				watchHistory.map(({ year, items }) => (
+					<section>
+						<h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-100">{year}</h2>
+						<ul class="list-disc space-y-1 pl-6 text-gray-700 dark:text-gray-300">
+							{items.map((item) => (
+								<li>{item}</li>
+							))}
+						</ul>
+					</section>
+				))
+			}
+		</div>
+	</div>
+</PageLayout>
