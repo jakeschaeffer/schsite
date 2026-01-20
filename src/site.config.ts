@@ -49,12 +49,8 @@ export const menuLinks: { path: string; title: string }[] = [
 		title: "Notes",
 	},
 	{
-		path: "/movies/",
-		title: "Movies",
-	},
-	{
-		path: "/shows/",
-		title: "Shows",
+		path: "/watched/",
+		title: "What I Watched",
 	},
 ];
 
