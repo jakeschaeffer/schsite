@@ -148,3 +148,33 @@ export function getTVShowIdsByYear(year: number): number[] {
 export function getAllYears(): number[] {
 	return watchHistory.map((group) => group.year);
 }
+
+/**
+ * Get watch history from Trakt (if configured) or fall back to manual data
+ * This async function should be called at build time in pages
+ */
+export async function getWatchHistory(): Promise<YearGroup[]> {
+	// Try to import Trakt integration
+	try {
+		const { getTraktWatchHistory, isTraktConfigured } = await import("@/lib/trakt");
+
+		if (isTraktConfigured()) {
+			console.log("Loading watch history from Trakt...");
+			const traktHistory = await getTraktWatchHistory();
+
+			if (traktHistory.length > 0) {
+				console.log(`Loaded ${traktHistory.length} years of data from Trakt`);
+				return traktHistory;
+			}
+
+			console.log("Trakt returned no data, falling back to manual data");
+		} else {
+			console.log("Trakt not configured, using manual watch history");
+		}
+	} catch (error) {
+		console.error("Error loading from Trakt, falling back to manual data:", error);
+	}
+
+	// Fall back to manual data
+	return watchHistory;
+}

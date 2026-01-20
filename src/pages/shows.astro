@@ -2,22 +2,24 @@
 import PageLayout from "@/layouts/Base.astro";
 import ShowCard from "@/components/ShowCard.astro";
 import { getTVShows } from "@/lib/tmdb";
-import {
-	watchHistory,
-	getTVShowEntriesWithNotes,
-	getTVShowIdsByYear,
-} from "@/data/watch-history";
+import { getWatchHistory } from "@/data/watch-history";
 
 const meta = {
 	description: "TV shows I've watched and enjoyed",
 	title: "TV Shows",
 };
 
+// Load watch history (from Trakt if configured, otherwise manual data)
+const watchHistory = await getWatchHistory();
+
 // Fetch TV shows for each year with their watch entry metadata
 const showsByYear = await Promise.all(
 	watchHistory.map(async (yearGroup) => {
-		const showEntries = getTVShowEntriesWithNotes(yearGroup.year);
-		const showIds = getTVShowIdsByYear(yearGroup.year);
+		// Filter to only TV entries with notes
+		const showEntries = yearGroup.entries.filter((entry) => entry.type === "tv" && entry.notes);
+
+		// Get unique show IDs
+		const showIds = [...new Set(showEntries.map((entry) => entry.tmdbId))];
 		const shows = await getTVShows(showIds);
 
 		// Create a map of TMDB ID to entry for quick lookup

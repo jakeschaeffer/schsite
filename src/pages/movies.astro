@@ -2,18 +2,26 @@
 import PageLayout from "@/layouts/Base.astro";
 import MovieCard from "@/components/MovieCard.astro";
 import { getMovies } from "@/lib/tmdb";
-import { watchHistory, getMovieEntriesWithNotes, getMovieIdsByYear } from "@/data/watch-history";
+import { getWatchHistory } from "@/data/watch-history";
 
 const meta = {
 	description: "Movies I've watched and enjoyed",
 	title: "Movies",
 };
 
+// Load watch history (from Trakt if configured, otherwise manual data)
+const watchHistory = await getWatchHistory();
+
 // Fetch movies for each year with their watch entry metadata
 const moviesByYear = await Promise.all(
 	watchHistory.map(async (yearGroup) => {
-		const movieEntries = getMovieEntriesWithNotes(yearGroup.year);
-		const movieIds = getMovieIdsByYear(yearGroup.year);
+		// Filter to only movie entries with notes
+		const movieEntries = yearGroup.entries.filter(
+			(entry) => entry.type === "movie" && entry.notes,
+		);
+
+		// Get unique movie IDs
+		const movieIds = [...new Set(movieEntries.map((entry) => entry.tmdbId))];
 		const movies = await getMovies(movieIds);
 
 		// Create a map of TMDB ID to entry for quick lookup
